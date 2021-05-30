@@ -30,20 +30,20 @@ end_time = args.end_time
 month_number = args.month_number
 column_name = args.column_name
 output = args.output
-list_of_names = args.nargs
+list_of_vehicles = args.nargs
 
 client = pymongo.MongoClient(host=host, port=port, maxPoolSize=50, username=username, password=password, authSource="admin")
 
 for collection in client[database].collection_names():
-    for substr in list_of_names:
-        if substr in collection:
-            query_string = "--query='{" + f'''"{column_name}":''' + " {" + f'''"$gte": {start_time}, "$lte": {end_time}''' + "} }'"
-            export_command = f'''mongoexport --username {username} --password {password} --host {host}:{port} --authenticationDatabase admin --db {database} --collection {collection} ''' + query_string + f''' --out {output}'''
-            os.system(export_command)
+	if "ampq" in collection or "mqtt" in collection:
+		#missing part for vehicles, when you add it, indent everything after 40 line(for loop for vehicles)
+		#for vehicle in list_of_vehicles:
+        query_string = "--query='{" + f'''"{column_name}":''' + " {" + f'''"$gte": {start_time}, "$lte": {end_time}''' + "} }'"
+        export_command = f'''mongoexport --username {username} --password {password} --host {host}:{port} --authenticationDatabase admin --db {database} --collection {collection} ''' + query_string + f''' --out {output}'''
+        os.system(export_command)
 
-            new_collection = collection + "_" + month_number
-            import_command = f'''mongoimport --username {username} --password {password} --host {host}:{port} --authenticationDatabase admin --db {database_new} --collection {new_collection} --file {output}'''
-            os.system(import_command)
-            os.system(f"rm {output}")
-            break
-
+        new_collection = collection + "_" + month_number
+        import_command = f'''mongoimport --username {username} --password {password} --host {host}:{port} --authenticationDatabase admin --db {database_new} --collection {new_collection} --file {output}'''
+        os.system(import_command)
+            
+        os.system(f"rm {output}")
